@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Арина и Коля | Платформа желаний</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .platform {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255, 245, 250, 0.9);
+            border-radius: 50px;
+            padding: 35px 25px;
+            box-shadow: 0 20px 40px rgba(233, 30, 99, 0.3);
+            border: 2px solid #f8bbd0;
+            margin: 20px 0;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 48px;
+            color: #c2185b;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(233, 30, 99, 0.2);
+        }
+
+        .photo-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .photo-frame {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid white;
+            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.4);
+            background: #f8bbd0;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 20px;
+            color: #880e4f;
+            margin: 15px 0 25px;
+            font-style: italic;
+            background: rgba(248, 187, 208, 0.3);
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        .wish-section {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 30px;
+            padding: 25px;
+            margin-top: 10px;
+        }
+
+        /* Секция с желаниями */
+        .wishes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .wishes-title {
+            color: #c2185b;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .toggle-form-btn {
+            background: #e91e63;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .toggle-form-btn:hover {
+            background: #c2185b;
+            transform: scale(1.05);
+        }
+
+        .toggle-form-btn.collapsed {
+            background: #f8bbd0;
+            color: #c2185b;
+        }
+
+        /* Форма добавления/редактирования */
+        .add-wish-form {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px dashed #f8bbd0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .add-wish-form.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            margin-bottom: 0;
+            opacity: 0;
+            border: none;
+        }
+
+        .add-wish-form:not(.collapsed) {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .form-title {
+            color: #c2185b;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #880e4f;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #f8bbd0;
+            border-radius: 15px;
+            font-size: 14px;
+            outline: none;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #e91e63;
+        }
+
+        .image-upload {
+            margin: 10px 0;
+        }
+
+        .image-upload label {
+            background: #f8bbd0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #880e4f;
+            font-size: 14px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .preview-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.2);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .preview-image.show {
+            display: block;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .add-btn, .save-btn, .cancel-btn {
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            flex: 1;
+        }
+
+        .add-btn {
+            background: #e91e63;
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #c2185b;
+        }
+
+        .save-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #45a049;
+        }
+
+        .cancel-btn {
+            background: #f8bbd0;
+            color: #c2185b;
+        }
+
+        .cancel-btn:hover {
+            background: #f48fb1;
+        }
+
+        /* Сетка с желаниями */
+        .wishes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .wish-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(233, 30, 99, 0.15);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .wish-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(233, 30, 99, 0.25);
+        }
+
+        .wish-card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #fce4ec;
+            cursor: pointer;
+        }
+
+        .wish-card-content {
+            padding: 15px;
+        }
+
+        .wish-card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #c2185b;
+            margin-bottom: 5px;
+        }
+
+        .wish-card-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .wish-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .wish-card-date {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .wish-card-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-card-btn, .delete-card-btn {
+            background: #ffebee;
+            border: none;
+            color: #e91e63;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .edit-card-btn {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .edit-card-btn:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        .delete-card-btn:hover {
+            background: #e91e63;
+            color: white;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #c2185b;
+            padding: 30px;
+            font-style: italic;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="platform">
+        <div class="title">Арина и Коля</div>
+
+        <div class="photo-container">
+            <div class="photo-frame">
+                <img id="mainPhoto" src="Арина и Коля.jpg" alt="Арина и Коля">
+            </div>
+        </div>
+
+        <div class="subtitle">✨ Платформа совместных желаний ✨</div>
+
+        <div class="wish-section">
+            <!-- Заголовок и кнопка сворачивания -->
+            <div class="wishes-header">
+                <div class="wishes-title">💖 Наши желания</div>
+                <button class="toggle-form-btn" id="toggleFormBtn">
+                    ➕ Добавить желание
+                </button>
+            </div>
+
+            <!-- Форма добавления/редактирования (изначально свёрнута) -->
+            <div class="add-wish-form collapsed" id="addWishForm">
+                <div class="form-title" id="formTitle">➕ Добавить новое желание</div>
+                
+                <div class="form-group">
+                    <label>Название желания *</label>
+                    <input type="text" id="wishTitle" placeholder="Например: Путешествие в Париж">
+                </div>
+
+                <div class="form-group">
+                    <label>Описание (по желанию)</label>
+                    <textarea id="wishDescription" placeholder="Опишите ваше желание..."></textarea>
+                </div>
+
+                <div class="image-upload">
+                    <label for="imageInput">📸 Загрузить картинку</label>
+                    <input type="file" id="imageInput" accept="image/*">
+                    <img id="previewImage" class="preview-image" src="" alt="Предпросмотр">
+                </div>
+
+                <div class="form-buttons">
+                    <button class="cancel-btn" id="cancelBtn">Отмена</button>
+                    <button class="add-btn" id="submitWishBtn">💖 Добавить</button>
+                </div>
+            </div>
+
+            <!-- Сетка с желаниями -->
+            <div class="wishes-grid" id="wishesGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Предустановленные желания (iPad и PS5)
+        const defaultWishes = [
+            {
+                id: 1,
+                title: 'iPad Rose Gold',
+                description: 'Розовый iPad для творчества, рисования и любимых сериалов. Мечтаем вместе выбирать аксессуары!',
+                image: 'data:image/svg+xml,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+                        <rect width="300" height="200" fill="#f8bbd0" rx="20"/>
+                        <rect x="40" y="20" width="220" height="150" fill="white" rx="15" stroke="#e91e63" stroke-width="3"/>
+                        <circle cx="150" cy="95" r="15" fill="#e91e63"/>
+                        <text x="150" y="170" text-anchor="middle" fill="#c2185b" font-size="16" font-weight="bold">iPad Rose Gold</text>
+                    </svg>
+                `),
+                date: new Date().toLocaleDateString()
+            },
+            {
+                id: 2,
+                title: 'PlayStation 5',
+                description: 'Игровая приставка для совместных вечеров. Будем играть в парные игры и веселиться!',
+                image: 'data:image/svg+xml,' + encodeURIComponent(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+                        <rect width="300" height="200" fill="#1a1a2e" rx="20"/>
+                        <rect x="80" y="30" width="140" height="100" fill="white" rx="10" stroke="#e91e63" stroke-width="3"/>
+                        <rect x="100" y="45" width="100" height="8" fill="#333" rx="4"/>
+                        <text x="150" y="160" text-anchor="middle" fill="white" font-size="14" font-weight="bold">PlayStation 5</text>
+                        <text x="150" y="180" text-anchor="middle" fill="#f8bbd0" font-size="10">Digital Edition</text>
+                    </svg>
+                `),
+                date: new Date().toLocaleDateString()
+            }
+        ];
+
+        // Загрузка желаний из localStorage или использование предустановленных
+        let wishes = JSON.parse(localStorage.getItem('wishesCards')) || defaultWishes;
+        let pendingImage = null;
+        let editingWishId = null; // ID желания, которое редактируется
+
+        // Сохранение в localStorage
+        function saveWishes() {
+            localStorage.setItem('wishesCards', JSON.stringify(wishes));
+        }
+
+        // Отображение желаний в виде карточек
+        function displayWishes() {
+            const wishesGrid = document.getElementById('wishesGrid');
+            
+            if (wishes.length === 0) {
+                wishesGrid.innerHTML = '<div class="empty-message">Пока нет желаний. Добавьте первое! 💕</div>';
+                return;
+            }
+
+            wishesGrid.innerHTML = wishes.map((wish, index) => `
+                <div class="wish-card">
+                    <img class="wish-card-image" src="${wish.image}" alt="${wish.title}" 
+                         onerror="this.src='data:image/svg+xml,${encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22><rect width=%22300%22 height=%22200%22 fill=%22%23fce4ec%22/><text x=%22150%22 y=%22110%22 text-anchor=%22middle%22 fill=%22%23c2185b%22 font-size=%2218%22>Нет фото</text></svg>')}'"
+                         onclick="editWish(${wish.id})" title="Нажмите для редактирования">
+                    <div class="wish-card-content">
+                        <div class="wish-card-title">${wish.title}</div>
+                        ${wish.description ? `<div class="wish-card-description">${wish.description}</div>` : ''}
+                        <div class="wish-card-footer">
+                            <span class="wish-card-date">${wish.date}</span>
+                            <div class="wish-card-actions">
+                                <button class="edit-card-btn" onclick="event.stopPropagation(); editWish(${wish.id})">✏️</button>
+                                <button class="delete-card-btn" onclick="event.stopPropagation(); deleteWish(${wish.id})">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Удаление желания
+        function deleteWish(id) {
+            if (confirm('Удалить это желание?')) {
+                wishes = wishes.filter(w => w.id !== id);
+                saveWishes();
+                displayWishes();
+                
+                // Если удаляем редактируемое желание, сбрасываем форму
+                if (editingWishId === id) {
+                    resetForm();
+                }
+            }
+        }
+
+        // Редактирование желания
+        function editWish(id) {
+            const wish = wishes.find(w => w.id === id);
+            if (!wish) return;
+
+            editingWishId = id;
+            
+            // Заполняем форму данными желания
+            document.getElementById('wishTitle').value = wish.title;
+            document.getElementById('wishDescription').value = wish.description || '';
+            
+            // Показываем текущее изображение
+            const preview = document.getElementById('previewImage');
+            preview.src = wish.image;
+            preview.classList.add('show');
+            pendingImage = wish.image;
+            
+            // Меняем заголовок и кнопку
+            document.getElementById('formTitle').textContent = '✏️ Редактировать желание';
+            document.getElementById('submitWishBtn').textContent = '💾 Сохранить';
+            document.getElementById('submitWishBtn').className = 'save-btn';
+            
+            // Разворачиваем форму
+            document.getElementById('addWishForm').classList.remove('collapsed');
+            document.getElementById('toggleFormBtn').textContent = '🔼 Свернуть';
+            document.getElementById('toggleFormBtn').classList.add('collapsed');
+            
+            // Скроллим к форме
+            document.getElementById('addWishForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Сброс формы
+        function resetForm() {
+            editingWishId = null;
+            document.getElementById('wishTitle').value = '';
+            document.getElementById('wishDescription').value = '';
+            document.getElementById('imageInput').value = '';
+            document.getElementById('previewImage').classList.remove('show');
+            pendingImage = null;
+            
+            document.getElementById('formTitle').textContent = '➕ Добавить новое желание';
+            document.getElementById('submitWishBtn').textContent = '💖 Добавить';
+            document.getElementById('submitWishBtn').className = 'add-btn';
+        }
+
+        // Добавление или сохранение желания
+        function submitWish() {
+            const title = document.getElementById('wishTitle').value.trim();
+            const description = document.getElementById('wishDescription').value.trim();
+
+            if (!title) {
+                alert('Введите название желания');
+                return;
+            }
+
+            if (!pendingImage) {
+                alert('Загрузите картинку для желания');
+                return;
+            }
+
+            if (editingWishId) {
+                // Редактирование существующего желания
+                const wishIndex = wishes.findIndex(w => w.id === editingWishId);
+                if (wishIndex !== -1) {
+                    wishes[wishIndex] = {
+                        ...wishes[wishIndex],
+                        title: title,
+                        description: description,
+                        image: pendingImage,
+                        date: new Date().toLocaleDateString() + ' (изменено)'
+                    };
+                }
+            } else {
+                // Добавление нового желания
+                const newWish = {
+                    id: Date.now(),
+                    title: title,
+                    description: description,
+                    image: pendingImage,
+                    date: new Date().toLocaleDateString()
+                };
+                wishes.push(newWish);
+            }
+
+            saveWishes();
+            resetForm();
+            
+            // Сворачиваем форму
+            document.getElementById('addWishForm').classList.add('collapsed');
+            document.getElementById('toggleFormBtn').textContent = '➕ Добавить желание';
+            document.getElementById('toggleFormBtn').classList.remove('collapsed');
+            
+            displayWishes();
+        }
+
+        // Переключение видимости формы
+        function toggleForm() {
+            const form = document.getElementById('addWishForm');
+            const btn = document.getElementById('toggleFormBtn');
+            
+            if (form.classList.contains('collapsed')) {
+                // Разворачиваем
+                if (!editingWishId) {
+                    resetForm();
+                }
+                form.classList.remove('collapsed');
+                btn.textContent = '🔼 Свернуть';
+                btn.classList.add('collapsed');
+            } else {
+                // Сворачиваем
+                form.classList.add('collapsed');
+                btn.textContent = '➕ Добавить желание';
+                btn.classList.remove('collapsed');
+                if (!editingWishId) {
+                    resetForm();
+                }
+            }
+        }
+
+        // Обработка загрузки изображения
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                pendingImage = event.target.result;
+                const preview = document.getElementById('previewImage');
+                preview.src = event.target.result;
+                preview.classList.add('show');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Замена главной фотографии
+        document.getElementById('mainPhoto').addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('mainPhoto').src = event.target.result;
+                    localStorage.setItem('mainPhoto', event.target.result);
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        });
+
+        // Загрузка сохраненного главного фото
+        const savedPhoto = localStorage.getItem('mainPhoto');
+        if (savedPhoto) {
+            document.getElementById('mainPhoto').src = savedPhoto;
+        }
+
+        // Обработчики событий
+        document.getElementById('submitWishBtn').addEventListener('click', submitWish);
+        document.getElementById('toggleFormBtn').addEventListener('click', toggleForm);
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            resetForm();
+            document.getElementById('addWishForm').classList.add('collapsed');
+            document.getElementById('toggleFormBtn').textContent = '➕ Добавить желание';
+            document.getElementById('toggleFormBtn').classList.remove('collapsed');
+        });
+
+        // Сохраняем предустановленные желания, если еще не сохранены
+        if (!localStorage.getItem('wishesCards')) {
+            saveWishes();
+        }
+
+        // Первоначальное отображение
+        displayWishes();
+    </script>
+</body>
+</html>
