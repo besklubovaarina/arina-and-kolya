@@ -24,7 +24,7 @@
         .platform {
             max-width: 750px;
             width: 100%;
-            background: rgba(255, 245, 250, 0.9);
+            background: rgba(255, 245, 250, 0.95);
             border-radius: 50px;
             padding: 35px 25px;
             box-shadow: 0 20px 40px rgba(233, 30, 99, 0.3);
@@ -63,6 +63,14 @@
             object-fit: cover;
         }
 
+        .photo-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #c2185b;
+            margin-top: 8px;
+            opacity: 0.7;
+        }
+
         .subtitle {
             text-align: center;
             font-size: 20px;
@@ -74,6 +82,22 @@
             border-radius: 30px;
         }
 
+        .sync-status {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            transition: all 0.3s;
+        }
+
+        .sync-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
         .wish-section {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 30px;
@@ -81,12 +105,13 @@
             margin-top: 10px;
         }
 
-        /* Секция с желаниями */
         .wishes-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .wishes-title {
@@ -117,7 +142,6 @@
             color: #c2185b;
         }
 
-        /* Форма добавления/редактирования */
         .add-wish-form {
             background: white;
             border-radius: 20px;
@@ -229,6 +253,7 @@
             font-weight: bold;
             border: none;
             flex: 1;
+            transition: all 0.2s;
         }
 
         .add-btn {
@@ -258,7 +283,6 @@
             background: #f48fb1;
         }
 
-        /* Сетка с желаниями */
         .wishes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -323,9 +347,7 @@
         }
 
         .edit-card-btn, .delete-card-btn {
-            background: #ffebee;
             border: none;
-            color: #e91e63;
             padding: 5px 10px;
             border-radius: 12px;
             font-size: 12px;
@@ -344,9 +366,47 @@
             color: white;
         }
 
+        .delete-card-btn {
+            background: #ffebee;
+            color: #e91e63;
+        }
+
         .delete-card-btn:hover {
             background: #e91e63;
             color: white;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 18px;
+            color: #c2185b;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f8bbd0;
+            border-top: 3px solid #e91e63;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .empty-message {
@@ -356,30 +416,56 @@
             font-style: italic;
             grid-column: 1 / -1;
         }
+
+        @media (max-width: 500px) {
+            .platform {
+                padding: 20px 15px;
+                border-radius: 30px;
+            }
+            .title {
+                font-size: 36px;
+            }
+            .photo-frame {
+                width: 200px;
+                height: 200px;
+            }
+            .wishes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        Загрузка желаний...
+    </div>
+
     <div class="platform">
         <div class="title">Арина и Коля</div>
 
         <div class="photo-container">
             <div class="photo-frame">
-                <img id="mainPhoto" src="Арина и Коля.jpg" alt="Арина и Коля">
+                <img id="mainPhoto" src="Арина и Коля.jpg" alt="Арина и Коля" title="Нажмите, чтобы изменить фото">
             </div>
         </div>
+        <div class="photo-hint">📷 Нажмите на фото, чтобы изменить</div>
 
         <div class="subtitle">✨ Платформа совместных желаний ✨</div>
 
+        <div class="sync-status" id="syncStatus">🟢 Все данные синхронизированы</div>
+
         <div class="wish-section">
-            <!-- Заголовок и кнопка сворачивания -->
             <div class="wishes-header">
                 <div class="wishes-title">💖 Наши желания</div>
-                <button class="toggle-form-btn" id="toggleFormBtn">
+                <button class="toggle-form-btn collapsed" id="toggleFormBtn">
                     ➕ Добавить желание
                 </button>
             </div>
 
-            <!-- Форма добавления/редактирования (изначально свёрнута) -->
+            <!-- Форма -->
             <div class="add-wish-form collapsed" id="addWishForm">
                 <div class="form-title" id="formTitle">➕ Добавить новое желание</div>
                 
@@ -405,77 +491,157 @@
                 </div>
             </div>
 
-            <!-- Сетка с желаниями -->
+            <!-- Сетка желаний -->
             <div class="wishes-grid" id="wishesGrid"></div>
         </div>
     </div>
 
-    <script>
-        // Предустановленные желания (iPad и PS5)
-        const defaultWishes = [
-            {
-                id: 1,
-                title: 'iPad Rose Gold',
-                description: 'Розовый iPad для творчества, рисования и любимых сериалов. Мечтаем вместе выбирать аксессуары!',
-                image: 'data:image/svg+xml,' + encodeURIComponent(`
-                    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
-                        <rect width="300" height="200" fill="#f8bbd0" rx="20"/>
-                        <rect x="40" y="20" width="220" height="150" fill="white" rx="15" stroke="#e91e63" stroke-width="3"/>
-                        <circle cx="150" cy="95" r="15" fill="#e91e63"/>
-                        <text x="150" y="170" text-anchor="middle" fill="#c2185b" font-size="16" font-weight="bold">iPad Rose Gold</text>
-                    </svg>
-                `),
-                date: new Date().toLocaleDateString()
-            },
-            {
-                id: 2,
-                title: 'PlayStation 5',
-                description: 'Игровая приставка для совместных вечеров. Будем играть в парные игры и веселиться!',
-                image: 'data:image/svg+xml,' + encodeURIComponent(`
-                    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
-                        <rect width="300" height="200" fill="#1a1a2e" rx="20"/>
-                        <rect x="80" y="30" width="140" height="100" fill="white" rx="10" stroke="#e91e63" stroke-width="3"/>
-                        <rect x="100" y="45" width="100" height="8" fill="#333" rx="4"/>
-                        <text x="150" y="160" text-anchor="middle" fill="white" font-size="14" font-weight="bold">PlayStation 5</text>
-                        <text x="150" y="180" text-anchor="middle" fill="#f8bbd0" font-size="10">Digital Edition</text>
-                    </svg>
-                `),
-                date: new Date().toLocaleDateString()
-            }
-        ];
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-        // Загрузка желаний из localStorage или использование предустановленных
-        let wishes = JSON.parse(localStorage.getItem('wishesCards')) || defaultWishes;
+        // Ваш Firebase конфиг
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuS1hqFtp1WEL7FjhVfG7mjUC0l7PL1-8",
+            authDomain: "arina-kolya-wishes.firebaseapp.com",
+            projectId: "arina-kolya-wishes",
+            storageBucket: "arina-kolya-wishes.firebasestorage.app",
+            messagingSenderId: "1052094026505",
+            appId: "1:1052094026505:web:98e89b137955ec1eb079d8",
+            measurementId: "G-87VW2TVFHD"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const wishesCollection = collection(db, "wishes");
+
+        // Глобальные переменные
+        let wishes = [];
         let pendingImage = null;
-        let editingWishId = null; // ID желания, которое редактируется
+        let editingWishId = null;
 
-        // Сохранение в localStorage
-        function saveWishes() {
-            localStorage.setItem('wishesCards', JSON.stringify(wishes));
+        // DOM элементы
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const syncStatus = document.getElementById('syncStatus');
+        const wishesGrid = document.getElementById('wishesGrid');
+        const addWishForm = document.getElementById('addWishForm');
+        const wishTitle = document.getElementById('wishTitle');
+        const wishDescription = document.getElementById('wishDescription');
+        const previewImage = document.getElementById('previewImage');
+        const imageInput = document.getElementById('imageInput');
+        const submitWishBtn = document.getElementById('submitWishBtn');
+        const formTitle = document.getElementById('formTitle');
+        const toggleFormBtn = document.getElementById('toggleFormBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const mainPhoto = document.getElementById('mainPhoto');
+
+        // Функция обновления статуса синхронизации
+        function setSyncStatus(message, isError = false) {
+            syncStatus.textContent = message;
+            syncStatus.className = 'sync-status' + (isError ? ' error' : '');
         }
 
-        // Отображение желаний в виде карточек
+        // Загрузка желаний из Firebase
+        async function loadWishes() {
+            try {
+                loadingOverlay.classList.remove('hidden');
+                setSyncStatus('🔄 Синхронизация...');
+                
+                const q = query(wishesCollection, orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                wishes = [];
+                querySnapshot.forEach((doc) => {
+                    wishes.push({
+                        id: doc.id,
+                        firestoreId: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Если желаний нет, добавляем демо
+                if (wishes.length === 0) {
+                    await addDemoWishes();
+                }
+                
+                displayWishes();
+                setSyncStatus('🟢 Все данные синхронизированы');
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                setSyncStatus('🔴 Ошибка синхронизации. Проверьте подключение.', true);
+                
+                // Пробуем загрузить из localStorage как запасной вариант
+                const localWishes = localStorage.getItem('wishesCards');
+                if (localWishes) {
+                    wishes = JSON.parse(localWishes);
+                    displayWishes();
+                }
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // Добавление демо-желаний
+        async function addDemoWishes() {
+            const demoWishes = [
+                {
+                    title: 'iPad Rose Gold',
+                    description: 'Розовый iPad для творчества, рисования и любимых сериалов. Мечтаем вместе выбирать аксессуары!',
+                    image: 'data:image/svg+xml,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+                            <rect width="300" height="200" fill="#f8bbd0" rx="20"/>
+                            <rect x="40" y="20" width="220" height="150" fill="white" rx="15" stroke="#e91e63" stroke-width="3"/>
+                            <circle cx="150" cy="95" r="15" fill="#e91e63"/>
+                            <text x="150" y="170" text-anchor="middle" fill="#c2185b" font-size="16" font-weight="bold">iPad Rose Gold</text>
+                        </svg>
+                    `),
+                    createdAt: Date.now()
+                },
+                {
+                    title: 'PlayStation 5',
+                    description: 'Игровая приставка для совместных вечеров. Будем играть в парные игры и веселиться!',
+                    image: 'data:image/svg+xml,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+                            <rect width="300" height="200" fill="#1a1a2e" rx="20"/>
+                            <rect x="80" y="30" width="140" height="100" fill="white" rx="10" stroke="#e91e63" stroke-width="3"/>
+                            <rect x="100" y="45" width="100" height="8" fill="#333" rx="4"/>
+                            <text x="150" y="160" text-anchor="middle" fill="white" font-size="14" font-weight="bold">PlayStation 5</text>
+                            <text x="150" y="180" text-anchor="middle" fill="#f8bbd0" font-size="10">Digital Edition</text>
+                        </svg>
+                    `),
+                    createdAt: Date.now() + 1
+                }
+            ];
+
+            for (const demo of demoWishes) {
+                await addDoc(wishesCollection, demo);
+            }
+        }
+
+        // Отображение желаний
         function displayWishes() {
-            const wishesGrid = document.getElementById('wishesGrid');
-            
             if (wishes.length === 0) {
                 wishesGrid.innerHTML = '<div class="empty-message">Пока нет желаний. Добавьте первое! 💕</div>';
                 return;
             }
 
-            wishesGrid.innerHTML = wishes.map((wish, index) => `
+            wishesGrid.innerHTML = wishes.map(wish => `
                 <div class="wish-card">
-                    <img class="wish-card-image" src="${wish.image}" alt="${wish.title}" 
-                         onerror="this.src='data:image/svg+xml,${encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22><rect width=%22300%22 height=%22200%22 fill=%22%23fce4ec%22/><text x=%22150%22 y=%22110%22 text-anchor=%22middle%22 fill=%22%23c2185b%22 font-size=%2218%22>Нет фото</text></svg>')}'"
-                         onclick="editWish(${wish.id})" title="Нажмите для редактирования">
+                    <img class="wish-card-image" 
+                         src="${wish.image || 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22><rect width=%22300%22 height=%22200%22 fill=%22%23fce4ec%22/><text x=%22150%22 y=%22110%22 text-anchor=%22middle%22 fill=%22%23c2185b%22 font-size=%2218%22>Нет фото</text></svg>')}" 
+                         alt="${wish.title || 'Желание'}"
+                         onclick="editWishById('${wish.firestoreId}')"
+                         title="Нажмите для редактирования">
                     <div class="wish-card-content">
-                        <div class="wish-card-title">${wish.title}</div>
+                        <div class="wish-card-title">${wish.title || 'Без названия'}</div>
                         ${wish.description ? `<div class="wish-card-description">${wish.description}</div>` : ''}
                         <div class="wish-card-footer">
-                            <span class="wish-card-date">${wish.date}</span>
+                            <span class="wish-card-date">${wish.date || new Date(wish.createdAt).toLocaleDateString()}</span>
                             <div class="wish-card-actions">
-                                <button class="edit-card-btn" onclick="event.stopPropagation(); editWish(${wish.id})">✏️</button>
-                                <button class="delete-card-btn" onclick="event.stopPropagation(); deleteWish(${wish.id})">✕</button>
+                                <button class="edit-card-btn" onclick="event.stopPropagation(); editWishById('${wish.firestoreId}')">✏️</button>
+                                <button class="delete-card-btn" onclick="event.stopPropagation(); deleteWishById('${wish.firestoreId}')">✕</button>
                             </div>
                         </div>
                     </div>
@@ -483,69 +649,68 @@
             `).join('');
         }
 
-        // Удаление желания
-        function deleteWish(id) {
-            if (confirm('Удалить это желание?')) {
-                wishes = wishes.filter(w => w.id !== id);
-                saveWishes();
-                displayWishes();
-                
-                // Если удаляем редактируемое желание, сбрасываем форму
-                if (editingWishId === id) {
-                    resetForm();
-                }
-            }
-        }
-
-        // Редактирование желания
-        function editWish(id) {
-            const wish = wishes.find(w => w.id === id);
+        // Делаем функции глобально доступными
+        window.editWishById = function(firestoreId) {
+            const wish = wishes.find(w => w.firestoreId === firestoreId);
             if (!wish) return;
+            
+            editingWishId = firestoreId;
+            wishTitle.value = wish.title || '';
+            wishDescription.value = wish.description || '';
+            pendingImage = wish.image || null;
+            
+            if (wish.image) {
+                previewImage.src = wish.image;
+                previewImage.classList.add('show');
+            } else {
+                previewImage.classList.remove('show');
+            }
+            
+            formTitle.textContent = '✏️ Редактировать желание';
+            submitWishBtn.textContent = '💾 Сохранить';
+            submitWishBtn.className = 'save-btn';
+            
+            addWishForm.classList.remove('collapsed');
+            toggleFormBtn.textContent = '🔼 Свернуть';
+            toggleFormBtn.classList.add('collapsed');
+            
+            addWishForm.scrollIntoView({ behavior: 'smooth' });
+        };
 
-            editingWishId = id;
+        window.deleteWishById = async function(firestoreId) {
+            if (!confirm('Удалить это желание?')) return;
             
-            // Заполняем форму данными желания
-            document.getElementById('wishTitle').value = wish.title;
-            document.getElementById('wishDescription').value = wish.description || '';
-            
-            // Показываем текущее изображение
-            const preview = document.getElementById('previewImage');
-            preview.src = wish.image;
-            preview.classList.add('show');
-            pendingImage = wish.image;
-            
-            // Меняем заголовок и кнопку
-            document.getElementById('formTitle').textContent = '✏️ Редактировать желание';
-            document.getElementById('submitWishBtn').textContent = '💾 Сохранить';
-            document.getElementById('submitWishBtn').className = 'save-btn';
-            
-            // Разворачиваем форму
-            document.getElementById('addWishForm').classList.remove('collapsed');
-            document.getElementById('toggleFormBtn').textContent = '🔼 Свернуть';
-            document.getElementById('toggleFormBtn').classList.add('collapsed');
-            
-            // Скроллим к форме
-            document.getElementById('addWishForm').scrollIntoView({ behavior: 'smooth' });
-        }
+            try {
+                setSyncStatus('🔄 Удаление...');
+                const wishDoc = doc(db, "wishes", firestoreId);
+                await deleteDoc(wishDoc);
+                
+                wishes = wishes.filter(w => w.firestoreId !== firestoreId);
+                displayWishes();
+                setSyncStatus('🟢 Желание удалено');
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                setSyncStatus('🔴 Ошибка при удалении', true);
+            }
+        };
 
         // Сброс формы
         function resetForm() {
             editingWishId = null;
-            document.getElementById('wishTitle').value = '';
-            document.getElementById('wishDescription').value = '';
-            document.getElementById('imageInput').value = '';
-            document.getElementById('previewImage').classList.remove('show');
+            wishTitle.value = '';
+            wishDescription.value = '';
+            imageInput.value = '';
+            previewImage.classList.remove('show');
             pendingImage = null;
-            
-            document.getElementById('formTitle').textContent = '➕ Добавить новое желание';
-            document.getElementById('submitWishBtn').textContent = '💖 Добавить';
-            document.getElementById('submitWishBtn').className = 'add-btn';
+            formTitle.textContent = '➕ Добавить новое желание';
+            submitWishBtn.textContent = '💖 Добавить';
+            submitWishBtn.className = 'add-btn';
         }
 
-        // Добавление или сохранение желания
-        function submitWish() {
-            const title = document.getElementById('wishTitle').value.trim();
-            const description = document.getElementById('wishDescription').value.trim();
+        // Отправка желания
+        async function submitWish() {
+            const title = wishTitle.value.trim();
+            const description = wishDescription.value.trim();
 
             if (!title) {
                 alert('Введите название желания');
@@ -557,82 +722,104 @@
                 return;
             }
 
-            if (editingWishId) {
-                // Редактирование существующего желания
-                const wishIndex = wishes.findIndex(w => w.id === editingWishId);
-                if (wishIndex !== -1) {
-                    wishes[wishIndex] = {
-                        ...wishes[wishIndex],
-                        title: title,
-                        description: description,
-                        image: pendingImage,
-                        date: new Date().toLocaleDateString() + ' (изменено)'
-                    };
-                }
-            } else {
-                // Добавление нового желания
-                const newWish = {
-                    id: Date.now(),
+            try {
+                setSyncStatus('🔄 Сохранение...');
+                
+                const wishData = {
                     title: title,
                     description: description,
                     image: pendingImage,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString(),
+                    createdAt: Date.now()
                 };
-                wishes.push(newWish);
-            }
 
-            saveWishes();
-            resetForm();
-            
-            // Сворачиваем форму
-            document.getElementById('addWishForm').classList.add('collapsed');
-            document.getElementById('toggleFormBtn').textContent = '➕ Добавить желание';
-            document.getElementById('toggleFormBtn').classList.remove('collapsed');
-            
-            displayWishes();
-        }
+                if (editingWishId) {
+                    // Обновление
+                    const wishDoc = doc(db, "wishes", editingWishId);
+                    await updateDoc(wishDoc, wishData);
+                    setSyncStatus('🟢 Желание обновлено');
+                } else {
+                    // Добавление
+                    await addDoc(wishesCollection, wishData);
+                    setSyncStatus('🟢 Желание добавлено');
+                }
 
-        // Переключение видимости формы
-        function toggleForm() {
-            const form = document.getElementById('addWishForm');
-            const btn = document.getElementById('toggleFormBtn');
-            
-            if (form.classList.contains('collapsed')) {
-                // Разворачиваем
-                if (!editingWishId) {
-                    resetForm();
-                }
-                form.classList.remove('collapsed');
-                btn.textContent = '🔼 Свернуть';
-                btn.classList.add('collapsed');
-            } else {
-                // Сворачиваем
-                form.classList.add('collapsed');
-                btn.textContent = '➕ Добавить желание';
-                btn.classList.remove('collapsed');
-                if (!editingWishId) {
-                    resetForm();
-                }
+                resetForm();
+                addWishForm.classList.add('collapsed');
+                toggleFormBtn.textContent = '➕ Добавить желание';
+                toggleFormBtn.classList.remove('collapsed');
+                
+                await loadWishes(); // Перезагружаем список
+                
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                setSyncStatus('🔴 Ошибка при сохранении. Попробуйте снова.', true);
             }
         }
 
-        // Обработка загрузки изображения
-        document.getElementById('imageInput').addEventListener('change', function(e) {
+        // Обработчики событий
+        imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
+            // Сжимаем изображение если оно большое
             const reader = new FileReader();
             reader.onload = function(event) {
-                pendingImage = event.target.result;
-                const preview = document.getElementById('previewImage');
-                preview.src = event.target.result;
-                preview.classList.add('show');
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Максимальный размер 800px
+                    const maxSize = 800;
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = (height / width) * maxSize;
+                            width = maxSize;
+                        } else {
+                            width = (width / height) * maxSize;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    pendingImage = canvas.toDataURL('image/jpeg', 0.8);
+                    previewImage.src = pendingImage;
+                    previewImage.classList.add('show');
+                };
+                img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        // Замена главной фотографии
-        document.getElementById('mainPhoto').addEventListener('click', function() {
+        submitWishBtn.addEventListener('click', submitWish);
+        
+        toggleFormBtn.addEventListener('click', function() {
+            if (addWishForm.classList.contains('collapsed')) {
+                if (!editingWishId) resetForm();
+                addWishForm.classList.remove('collapsed');
+                toggleFormBtn.textContent = '🔼 Свернуть';
+                toggleFormBtn.classList.add('collapsed');
+            } else {
+                addWishForm.classList.add('collapsed');
+                toggleFormBtn.textContent = '➕ Добавить желание';
+                toggleFormBtn.classList.remove('collapsed');
+            }
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            resetForm();
+            addWishForm.classList.add('collapsed');
+            toggleFormBtn.textContent = '➕ Добавить желание';
+            toggleFormBtn.classList.remove('collapsed');
+        });
+
+        mainPhoto.addEventListener('click', function() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
@@ -640,7 +827,7 @@
                 const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    document.getElementById('mainPhoto').src = event.target.result;
+                    mainPhoto.src = event.target.result;
                     localStorage.setItem('mainPhoto', event.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -648,29 +835,14 @@
             input.click();
         });
 
-        // Загрузка сохраненного главного фото
+        // Загрузка сохраненного фото
         const savedPhoto = localStorage.getItem('mainPhoto');
         if (savedPhoto) {
-            document.getElementById('mainPhoto').src = savedPhoto;
+            mainPhoto.src = savedPhoto;
         }
 
-        // Обработчики событий
-        document.getElementById('submitWishBtn').addEventListener('click', submitWish);
-        document.getElementById('toggleFormBtn').addEventListener('click', toggleForm);
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            resetForm();
-            document.getElementById('addWishForm').classList.add('collapsed');
-            document.getElementById('toggleFormBtn').textContent = '➕ Добавить желание';
-            document.getElementById('toggleFormBtn').classList.remove('collapsed');
-        });
-
-        // Сохраняем предустановленные желания, если еще не сохранены
-        if (!localStorage.getItem('wishesCards')) {
-            saveWishes();
-        }
-
-        // Первоначальное отображение
-        displayWishes();
+        // Запуск
+        loadWishes();
     </script>
 </body>
 </html>
